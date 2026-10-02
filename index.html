@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Mawar &amp; Arjun — 7 November 2026</title>
 <meta name="description" content="Undangan pernikahan Mawarda Sholeha &amp; Arjun Nur Alfantori">
 <meta name="theme-color" content="#2a0d14">
@@ -22,6 +22,7 @@
     <p class="small fade" style="--d:.6s">THE WEDDING OF</p>
     <h1 class="names fade" style="--d:1.4s">Mawar<span>&amp;</span>Arjun</h1>
     <p class="date fade" style="--d:2.4s">07 • 11 • 2026</p>
+    <p class="guest fade" id="guestBox" style="--d:2.8s" hidden>Kepada Yth.<b id="guestName"></b></p>
     <div class="envelope fade" id="envelope" style="--d:3.2s" aria-hidden="true">
       <div class="env-back"></div>
       <div class="env-card"><em>Mawar &amp; Arjun</em><small>Undangan Pernikahan</small></div>
@@ -40,8 +41,14 @@
   <div class="hero-in">
     <p class="small rv">THE WEDDING OF</p>
     <h2 class="big rv" style="--d:.2s">Mawar &amp; Arjun</h2>
-    <p class="date rv" style="--d:.4s">7 NOVEMBER 2026</p>
+    <p class="date rv" style="--d:.4s">SABTU, 7 NOVEMBER 2026</p>
     <p class="quote rv" style="--d:.6s">Dan di antara begitu banyak kemungkinan dalam hidup,<br>kami menemukan satu sama lain.</p>
+    <div class="cd rv" id="cd" aria-live="off" style="--d:.8s">
+      <div><b id="cdD">00</b><span>Hari</span></div><div><b id="cdH">00</b><span>Jam</span></div>
+      <div><b id="cdM">00</b><span>Menit</span></div><div><b id="cdS">00</b><span>Detik</span></div>
+    </div>
+    <p class="arrived" id="arrived" hidden>HARI BAHAGIA TELAH TIBA</p>
+    <p class="hero-guest rv" id="heroGuest" style="--d:1s" hidden>Kepada Yth.<b id="heroGuestName"></b></p>
   </div>
   <a class="scroll" href="#ayat" aria-label="Scroll ke bawah"><span>SCROLL TO DISCOVER</span><i></i></a>
 </section>
@@ -57,7 +64,8 @@
   <p class="small gold rv">A JOURNEY TO FOREVER</p>
   <p class="serif-q rv" style="--d:.2s">Setiap pertemuan memiliki cerita.<br>Setiap cerita memiliki alasan.<br>Dan setiap alasan membawa kami<br>sampai pada hari ini.</p>
   <div class="line rv" style="--d:.4s"></div>
-  <p class="intro-names rv" style="--d:.5s">Mawarda Sholeha<br><em>&amp;</em><br>Arjun Nur Alfantori</p>
+  <p class="intro-names rv" style="--d:.5s">Mawarda Sholeha, S.E.<br><em>&amp;</em><br>Arjun Nur Alfantori, S.M.</p>
+  <p class="muted center rv" style="--d:.7s;max-width:36ch;margin:2.2rem auto 0">Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu di hari pernikahan kami.</p>
 </section>
 
 <!-- MEMPELAI -->
@@ -65,12 +73,12 @@
   <div class="couple">
     <article class="person rv">
       <div class="ph portrait"><img src="images/02.jpg" alt="Mawarda Sholeha" loading="lazy" onerror="this.remove()"></div>
-      <h3>Mawarda Sholeha</h3>
+      <h3>Mawarda Sholeha, S.E.</h3>
       <p class="muted"><em class="ord">Putri kedua dari</em><br><b>Abdul Roni &amp; Aspidiana</b></p>
     </article>
     <article class="person rv" style="--d:.2s">
       <div class="ph portrait"><img src="images/03.jpg" alt="Arjun Nur Alfantori" loading="lazy" onerror="this.remove()"></div>
-      <h3>Arjun Nur Alfantori</h3>
+      <h3>Arjun Nur Alfantori, S.M.</h3>
       <p class="muted"><em class="ord">Putra pertama dari</em><br><b>Wahyono &amp; Mendrawati</b></p>
     </article>
   </div>
@@ -79,9 +87,9 @@
 <!-- STORY -->
 <section class="sec story" id="story">
   <h2 class="head rv">Our Story</h2>
-  <div class="chapter rv"><div class="ph wide"><img src="images/04.jpg" alt="Cerita pertemuan kami" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>[CERITA PERTEMUAN KAMI]</h3><p class="muted">Tulis kisah pertemuan Anda di sini.</p></div></div>
-  <div class="chapter rv rev"><div class="ph wide"><img src="images/05.jpg" alt="Momen yang membuat kami yakin" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>[MOMEN YANG MEMBUAT KAMI YAKIN]</h3><p class="muted">Tulis momen keyakinan Anda di sini.</p></div></div>
-  <div class="chapter rv"><div class="ph wide"><img src="images/06.jpg" alt="Cerita menuju pernikahan" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>[CERITA MENUJU PERNIKAHAN]</h3><p class="muted">Tulis perjalanan menuju hari bahagia di sini.</p></div></div>
+  <div class="chapter rv"><div class="ph wide"><img src="images/04.jpg" alt="Cerita pertemuan kami" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>Awal Pertemuan</h3><p class="muted">Dua jalan yang berbeda dipertemukan pada waktu yang tepat. Dari perkenalan sederhana, tumbuh rasa nyaman yang tidak pernah kami rencanakan.</p></div></div>
+  <div class="chapter rv rev"><div class="ph wide"><img src="images/05.jpg" alt="Momen yang membuat kami yakin" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>Keyakinan</h3><p class="muted">Bersama, kami belajar bahwa cinta bukan sekadar perasaan, melainkan keputusan untuk saling menjaga, mendengar, dan bertumbuh. Di sanalah hati kami mantap.</p></div></div>
+  <div class="chapter rv"><div class="ph wide"><img src="images/06.jpg" alt="Cerita menuju pernikahan" loading="lazy" onerror="this.remove()"></div><div class="txt"><i class="hl"></i><h3>Menuju Hari Bahagia</h3><p class="muted">Dengan restu orang tua dan doa keluarga, kami melangkah ke jenjang pernikahan, berharap menjadi rumah yang tenteram bagi satu sama lain.</p></div></div>
 </section>
 
 <!-- THE DAY -->
@@ -95,15 +103,6 @@
   <a class="btn rv" data-maps target="_blank" rel="noopener" aria-label="Lihat lokasi di Google Maps">LIHAT LOKASI</a>
 </section>
 
-<!-- COUNTDOWN -->
-<section class="sec center" id="countdown">
-  <div class="cd" id="cd" aria-live="off">
-    <div><b id="cdD">00</b><span>DAYS</span></div><div><b id="cdH">00</b><span>HOURS</span></div>
-    <div><b id="cdM">00</b><span>MINUTES</span></div><div><b id="cdS">00</b><span>SECONDS</span></div>
-  </div>
-  <p class="arrived" id="arrived" hidden>THE DAY HAS ARRIVED</p>
-</section>
-
 <!-- SAVE THE DATE -->
 <section class="sec center dark" id="save">
   <p class="small gold rv">SAVE THE DATE</p>
@@ -115,7 +114,15 @@
 <!-- GALERI -->
 <section class="sec gal" id="gallery">
   <h2 class="head rv">Moments</h2>
-  <div class="gallery" id="galleryGrid"></div>
+  <div class="carousel rv" id="carousel" role="region" aria-roledescription="carousel" aria-label="Galeri foto">
+    <div class="track" id="galleryTrack"></div>
+    <div class="gal-ctl">
+      <button class="gal-btn" id="galPrev" aria-label="Foto sebelumnya">&#8249;</button>
+      <p class="gal-count" id="galCount" aria-live="polite">01 / 15</p>
+      <button class="gal-btn" id="galNext" aria-label="Foto berikutnya">&#8250;</button>
+    </div>
+    <i class="gal-bar" aria-hidden="true"><b id="galBar"></b></i>
+  </div>
 </section>
 
 <!-- CINEMATIC PARALLAX -->
@@ -163,18 +170,18 @@
   <p class="muted rv">Doa dan kehadiran Anda adalah hadiah terindah bagi kami.<br>Namun jika ingin memberikan tanda kasih, dapat melalui:</p>
   <div class="gifts">
     <article class="gift rv">
-      <div class="gc-top"><span class="chip" aria-hidden="true"></span><p class="bank">JAGO</p></div>
+      <span class="chip" aria-hidden="true"></span>
+      <div class="gc-logo"><img src="images/logo-jago.png" alt="Bank Jago" onerror="this.outerHTML='<span class=wm-jago>jago</span>'"></div>
       <p class="acc">1011 9987 5925</p>
-      <small class="gc-lbl">Atas Nama</small>
       <p class="gc-name">Mawarda Sholeha</p>
-      <button class="btn sm" data-copy="101199875925" aria-label="Salin nomor rekening Mawarda">SALIN NOMOR REKENING</button>
+      <button class="gc-copy" data-copy="101199875925" aria-label="Salin nomor rekening Mawarda"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><span>Salin</span></button>
     </article>
     <article class="gift rv" style="--d:.2s">
-      <div class="gc-top"><span class="chip" aria-hidden="true"></span><p class="bank">BNI</p></div>
+      <span class="chip" aria-hidden="true"></span>
+      <div class="gc-logo"><img src="images/logo-bni.png" alt="BNI" onerror="this.outerHTML='<span class=wm-bni>BNI<sup>46</sup></span>'"></div>
       <p class="acc">1378 0798 25</p>
-      <small class="gc-lbl">Atas Nama</small>
       <p class="gc-name">Arjun Nur Alfantori</p>
-      <button class="btn sm" data-copy="1378079825" aria-label="Salin nomor rekening Arjun">SALIN NOMOR REKENING</button>
+      <button class="gc-copy" data-copy="1378079825" aria-label="Salin nomor rekening Arjun"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><span>Salin</span></button>
     </article>
   </div>
 </section>
@@ -208,6 +215,14 @@
   <input type="range" id="vol" min="0" max="1" step=".05" value=".6" aria-label="Volume">
 </div>
 <button class="autoscroll" id="autoBtn" hidden aria-label="Gulir otomatis" aria-pressed="false"><span>▼</span></button>
+<nav class="dock" id="dock" hidden aria-label="Navigasi undangan">
+  <a href="#hero" data-t="hero" aria-label="Beranda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></a>
+  <a href="#couple" data-t="couple" aria-label="Mempelai"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></a>
+  <a href="#day" data-t="day" aria-label="Acara"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></a>
+  <a href="#gallery" data-t="gallery" aria-label="Galeri"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-9 9"/></svg></a>
+  <a href="#gift" data-t="gift" aria-label="Hadiah"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M12 8C10 8 7.5 7 7.5 5.2 7.5 3.8 9 3 10.2 3.5 11.5 4 12 6 12 8zM12 8c2 0 4.5-1 4.5-2.8C16.5 3.8 15 3 13.8 3.5 12.5 4 12 6 12 8z"/></svg></a>
+  <a href="#rsvp" data-t="rsvp wishes" aria-label="Konfirmasi dan ucapan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-5.2A8 8 0 1 1 21 12z"/></svg></a>
+</nav>
 <audio id="audio" src="audio/sampai-jadi-debu.mp3" loop preload="none"></audio>
 
 <!-- LIGHTBOX -->

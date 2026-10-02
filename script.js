@@ -1,7 +1,7 @@
 /* ============ KONFIGURASI — edit di sini ============ */
 const weddingConfig = {
-  bride: "Mawarda Sholeha",
-  groom: "Arjun Nur Alfantori",
+  bride: "Mawarda Sholeha, S.E.",
+  groom: "Arjun Nur Alfantori, S.M.",
   date: "7 November 2026",
   akadTime: "08.00 WIB",
   receptionTime: "10.00 WIB",
@@ -29,6 +29,14 @@ const waText = "Halo Mawar & Arjun, saya ingin mengonfirmasi kehadiran untuk aca
 $("#waBtn").href = "https://wa.me/" + weddingConfig.whatsapp + "?text=" + encodeURIComponent(waText);
 $("#waBtn").addEventListener("click", e => { if (weddingConfig.whatsapp === "ISI_NOMOR") { e.preventDefault(); toast("Nomor WhatsApp belum diisi di script.js"); } });
 
+/* ============ Nama tamu: tambahkan ?to=Nama pada link ============ */
+const guest = (new URLSearchParams(location.search).get("to") || "").trim().slice(0, 60);
+if (guest) {
+  $("#guestName").textContent = guest; $("#guestBox").hidden = false;
+  $("#heroGuestName").textContent = guest; $("#heroGuest").hidden = false;
+  $("#rsvpForm [name=name]").defaultValue = guest; $("#wishForm [name=name]").defaultValue = guest;
+}
+
 /* ============ Cover & musik ============ */
 const audio = $("#audio"), music = $("#music");
 function setMusicUI(on) { music.classList.toggle("playing", on); $("#musicStatus").textContent = on ? "Playing" : "Paused"; }
@@ -37,13 +45,13 @@ $("#openBtn").addEventListener("click", () => {
   $("#envelope").classList.add("opened");
   $("#openBtn").disabled = true;
   audio.play().then(() => setMusicUI(true)).catch(() => setMusicUI(false));
-  music.hidden = false;
+  music.hidden = false; $("#dock").hidden = false;
   const heroRv = $$("#hero .rv");
   heroRv.forEach(el => el.classList.remove("in"));   // disembunyikan dulu, dimunculkan saat cover larut
   if (!reduce) {
     const f = document.createElement("div"); f.className = "bloom"; document.body.appendChild(f);
     setTimeout(() => f.remove(), 4200);
-    setTimeout(() => petalBurst(innerWidth / 2, innerHeight * .55, 46), 2200);
+    setTimeout(() => petalBurst(innerWidth / 2, innerHeight * .55, 90, true), 2200);
     setTimeout(petalAmbient, 2800);
   }
   setTimeout(() => { $("#cover").classList.add("gone"); document.body.classList.remove("locked"); window.scrollTo(0, 0); }, reduce ? 300 : 2200);
@@ -59,21 +67,57 @@ $("#vol").addEventListener("input", e => { audio.volume = e.target.value; });
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .15 });
 const observe = () => $$(".rv:not(.in),.line:not(.in),.ph:not(.in),.gi:not(.in)").forEach(el => io.observe(el));
 
-/* ============ Galeri + lightbox (15 foto) ============ */
+/* ============ Galeri geser (carousel) + lightbox ============ */
 const photos = Array.from({ length: 15 }, (_, i) => `images/${String(i + 1).padStart(2, "0")}.jpg`);
-const grid = $("#galleryGrid");
+const track = $("#galleryTrack");
+const slides = () => $$(".slide", track);
+const gp = () => slides().map(s => s.dataset.src);
 photos.forEach((src, i) => {
   const b = document.createElement("button");
-  b.className = "gi"; b.setAttribute("aria-label", "Buka foto " + (i + 1));
-  b.innerHTML = `<img src="${src}" alt="Foto galeri Mawar dan Arjun ${i + 1}" loading="lazy" decoding="async">`;
-  b.firstChild.onerror = function () { this.remove(); };
-  b.addEventListener("click", () => openLB(i));
-  grid.appendChild(b);
+  b.className = "slide"; b.type = "button"; b.dataset.src = src; b.setAttribute("aria-label", "Buka foto " + (i + 1));
+  const im = new Image();
+  im.alt = "Foto galeri Mawar dan Arjun " + (i + 1); im.loading = "lazy"; im.decoding = "async"; im.draggable = false;
+  im.onload = () => b.classList.add("ready");
+  im.onerror = () => { b.remove(); updateGal(); };   // foto belum ada: slide dibuang
+  im.src = src; b.appendChild(im); track.appendChild(b);
 });
+function curSlide() {
+  const c = track.scrollLeft + track.clientWidth / 2; let best = 0, dist = 1e9;
+  slides().forEach((s, i) => { const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - c); if (d < dist) { dist = d; best = i; } });
+  return best;
+}
+function goTo(i, smooth = true) {
+  const s = slides(); if (!s.length) return;
+  const el = s[Math.max(0, Math.min(i, s.length - 1))];
+  track.scrollTo({ left: el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2, behavior: smooth && !reduce ? "smooth" : "auto" });
+}
+function updateGal() {
+  const s = slides(), n = s.length, i = curSlide(), p = v => String(v).padStart(2, "0");
+  s.forEach((el, k) => el.classList.toggle("active", k === i));
+  $("#galCount").textContent = n ? p(i + 1) + " / " + p(n) : "";
+  $("#galBar").style.width = n ? (i + 1) / n * 100 + "%" : "0";
+  $("#galPrev").disabled = i <= 0; $("#galNext").disabled = i >= n - 1;
+}
+let galTick = false;
+track.addEventListener("scroll", () => { if (!galTick) { galTick = true; requestAnimationFrame(() => { updateGal(); galTick = false; }); } }, { passive: true });
+addEventListener("resize", () => { goTo(curSlide(), false); updateGal(); });
+$("#galPrev").onclick = () => goTo(curSlide() - 1);
+$("#galNext").onclick = () => goTo(curSlide() + 1);
+track.addEventListener("keydown", e => { if (e.key === "ArrowLeft") goTo(curSlide() - 1); if (e.key === "ArrowRight") goTo(curSlide() + 1); });
+// geser dengan mouse di laptop; di HP cukup swipe
+let drag = null, moved = false;
+track.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse" || e.button) return; drag = { x: e.clientX, l: track.scrollLeft }; moved = false; });
+addEventListener("pointermove", e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 5) { moved = true; track.classList.add("drag"); } if (moved) track.scrollLeft = drag.l - dx; });
+addEventListener("pointerup", () => { if (!drag) return; drag = null; track.classList.remove("drag"); if (moved) goTo(curSlide()); });
+track.addEventListener("click", e => {
+  if (moved) { moved = false; e.preventDefault(); return; }
+  const s = e.target.closest(".slide"); if (s) openLB(slides().indexOf(s));
+});
+goTo(0, false); updateGal();
 const lb = $("#lb"), lbImg = $("#lbImg"); let cur = 0;
-function showLB(i) { cur = (i + photos.length) % photos.length; lbImg.style.opacity = 0; setTimeout(() => { lbImg.src = photos[cur]; lbImg.alt = "Foto galeri " + (cur + 1); lbImg.style.opacity = 1; }, 200); }
-function openLB(i) { lb.hidden = false; requestAnimationFrame(() => lb.classList.add("show")); lbImg.src = photos[i]; cur = i; document.body.classList.add("locked"); $("#lbX").focus(); }
-function closeLB() { lb.classList.remove("show"); setTimeout(() => { lb.hidden = true; document.body.classList.remove("locked"); }, 450); }
+function showLB(i) { cur = (i + gp().length) % gp().length; lbImg.style.opacity = 0; setTimeout(() => { lbImg.src = gp()[cur]; lbImg.alt = "Foto galeri " + (cur + 1); lbImg.style.opacity = 1; }, 200); }
+function openLB(i) { lb.hidden = false; requestAnimationFrame(() => lb.classList.add("show")); lbImg.src = gp()[i]; cur = i; document.body.classList.add("locked"); $("#lbX").focus(); }
+function closeLB() { lb.classList.remove("show"); goTo(cur, false); setTimeout(() => { lb.hidden = true; document.body.classList.remove("locked"); }, 450); }
 $("#lbX").onclick = closeLB; $("#lbP").onclick = () => showLB(cur - 1); $("#lbN").onclick = () => showLB(cur + 1);
 lb.addEventListener("click", e => { if (e.target === lb) closeLB(); });
 document.addEventListener("keydown", e => { if (lb.hidden) return; if (e.key === "Escape") closeLB(); if (e.key === "ArrowLeft") showLB(cur - 1); if (e.key === "ArrowRight") showLB(cur + 1); });
@@ -195,7 +239,7 @@ document.addEventListener("click", e => {
 const pxEls = $$(".px"); let ticking = false;
 function onScroll() {
   const h = document.documentElement; $("#progress").style.transform = `scaleX(${h.scrollTop / (h.scrollHeight - h.clientHeight || 1)})`;
-  if (!reduce) pxEls.forEach(el => { const r = el.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; el.firstElementChild && (el.firstElementChild.style.transform = `translate3d(0,${(r.top - innerHeight / 2) * -.12}px,0) scale(1.1)`); });
+  if (!reduce) pxEls.forEach(el => { const r = el.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; el.firstElementChild && (el.firstElementChild.style.transform = `translate3d(0,${(r.top - innerHeight / 2) * -.16}px,0) scale(1.2)`); });
   ticking = false;
 }
 addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -244,7 +288,10 @@ function newPetal(x, y, o = {}) {
 function drawPetal(p) {
   const c = pctx, s = p.s;
   c.save(); c.translate(p.x, p.y); c.rotate(p.rot); c.scale(1, Math.cos(p.t * 1.7)); c.globalAlpha = p.a; c.fillStyle = p.col;
-  c.beginPath(); c.moveTo(0, -s); c.bezierCurveTo(s * .9, -s * .6, s * .8, s * .7, 0, s); c.bezierCurveTo(-s * .8, s * .7, -s * .9, -s * .6, 0, -s); c.fill(); c.restore();
+  c.beginPath();
+  if (p.heart) { c.moveTo(0, s * .9); c.bezierCurveTo(-s * 1.6, -s * .1, -s * .7, -s * 1.1, 0, -s * .35); c.bezierCurveTo(s * .7, -s * 1.1, s * 1.6, -s * .1, 0, s * .9); }
+  else { c.moveTo(0, -s); c.bezierCurveTo(s * .9, -s * .6, s * .8, s * .7, 0, s); c.bezierCurveTo(-s * .8, s * .7, -s * .9, -s * .6, 0, -s); }
+  c.fill(); c.restore();
 }
 function petalLoop() {
   pctx.clearRect(0, 0, pw, ph);
@@ -261,11 +308,11 @@ function petalLoop() {
   if (petals.length) requestAnimationFrame(petalLoop); else pRun = false;
 }
 function petalStart() { if (!pRun) { pRun = true; requestAnimationFrame(petalLoop); } }
-function petalBurst(x, y, n = 30) {
+function petalBurst(x, y, n = 30, hearts = false) {
   petalInit(); if (!pctx) return;
   for (let i = 0; i < n; i++) {
     const ang = -Math.PI / 2 + (Math.random() - .5) * 2.6, sp = Math.random() * 9 + 3;
-    petals.push(newPetal(x, y, { vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, burst: true }));
+    petals.push(newPetal(x, y, { vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, burst: true, heart: hearts && i % 3 === 0 }));
   }
   petalStart();
 }
@@ -356,7 +403,6 @@ $$(".sec").forEach(s => {
 });
 
 // 4) galeri berurutan & countdown
-$$(".gi").forEach((g, i) => g.style.setProperty("--gd", (i % 4) * .12 + "s"));
 $("#cd").classList.add("rv");
 
 // 5) teks hero bergeser pelan & memudar saat digulir
@@ -366,4 +412,45 @@ if (!reduce) addEventListener("scroll", () => {
   if (y < h) { heroIn.style.transform = `translateY(${y * .25}px)`; heroIn.style.opacity = Math.max(0, 1 - y / (h * .7)); }
 }, { passive: true });
 
+// 6) ornamen mawar di sudut tiap bagian
+const addCorners = (el, list) => list.forEach(k => { const c = document.createElement("i"); c.className = "corner " + k; c.setAttribute("aria-hidden", "true"); el.append(c); io.observe(c); });
+$$(".sec").forEach(s => addCorners(s, ["tl", "br"]));
+["#cover", "#hero", "#cine", "#final"].forEach(s => addCorners($(s), ["tl", "tr", "bl", "br"]));
+
+// 7) hujan kelopak & hati saat memasuki bagian penting
+const wow = { couple: [26, false], day: [34, false], save: [60, true], cine: [50, true], final: [90, true] };
+const wio = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return; wio.unobserve(e.target);
+  if (reduce || document.body.classList.contains("locked")) return;
+  const [n, h] = wow[e.target.id]; petalBurst(innerWidth / 2, innerHeight * .92, n, h);
+}), { threshold: .45 });
+Object.keys(wow).forEach(id => wio.observe($("#" + id)));
+
+// 8) setiap bagian larut masuk saat pertama terlihat
+const sio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.remove("pre"); sio.unobserve(e.target); } }), { threshold: .05 });
+$$(".sec").forEach(s => { s.classList.add("pre"); sio.observe(s); });
+
+// 9) ranting terdorong angin saat halaman digulir
+if (!reduce) {
+  const cs = $$(".corner"); let wy = scrollY, wind = 0, tgt = 0, wRun = false;
+  const wLoop = () => {
+    wind += (tgt - wind) * .08; tgt *= .92;
+    cs.forEach(c => c.style.setProperty("--wind", wind.toFixed(2) + "deg"));
+    if (Math.abs(wind) > .02 || Math.abs(tgt) > .02) requestAnimationFrame(wLoop); else wRun = false;
+  };
+  addEventListener("scroll", () => {
+    tgt = Math.max(-8, Math.min(8, tgt + (scrollY - wy) * .12)); wy = scrollY;
+    if (!wRun) { wRun = true; requestAnimationFrame(wLoop); }
+  }, { passive: true });
+}
+
+// 10) navigasi melayang: tandai bagian yang sedang dilihat
+const navLinks = $$("#dock a"), secToNav = new Map();
+navLinks.forEach(a => a.dataset.t.split(" ").forEach(id => secToNav.set(id, a)));
+const nio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle("on", a === secToNav.get(e.target.id))); }), { rootMargin: "-45% 0px -45% 0px" });
+secToNav.forEach((a, id) => nio.observe($("#" + id)));
+
 observe(); onScroll();
+
+// iOS: cegah cubit-zoom supaya halaman tetap pas di tengah
+["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => e.preventDefault()));

@@ -236,10 +236,20 @@ document.addEventListener("click", e => {
 });
 
 /* ============ Scroll: progress + parallax ============ */
-const pxEls = $$(".px"); let ticking = false;
+const pxEls = $$(".px"); let ticking = false, docMax = 1, heroGone = false;
+const measure = () => { docMax = Math.max(1, document.documentElement.scrollHeight - innerHeight); };
+measure(); addEventListener("resize", measure); addEventListener("load", () => { measure(); setTimeout(measure, 1500); });
+if ("ResizeObserver" in window) new ResizeObserver(measure).observe(document.body);
 function onScroll() {
-  const h = document.documentElement; $("#progress").style.transform = `scaleX(${h.scrollTop / (h.scrollHeight - h.clientHeight || 1)})`;
-  if (!reduce) pxEls.forEach(el => { const r = el.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; el.firstElementChild && (el.firstElementChild.style.transform = `translate3d(0,${(r.top - innerHeight / 2) * -.16}px,0) scale(1.2)`); });
+  const y = scrollY, vh = innerHeight;
+  // 1) baca dulu semua ukuran, 2) baru tulis style (tanpa paksa layout berulang)
+  const rects = reduce ? [] : pxEls.map(el => el.parentElement.getBoundingClientRect());
+  $("#progress").style.transform = `scaleX(${Math.min(1, y / docMax)})`;
+  rects.forEach((r, k) => { const im = pxEls[k].firstElementChild; if (!im || r.bottom < 0 || r.top > vh) return; im.style.transform = `translate3d(0,${(r.top - vh / 2) * -.16}px,0) scale(1.2)`; });
+  if (!reduce && heroIn) {
+    if (y < vh) { heroGone = false; heroIn.style.transform = `translate3d(0,${y * .25}px,0)`; heroIn.style.opacity = Math.max(0, 1 - y / (vh * .7)); }
+    else if (!heroGone) { heroGone = true; heroIn.style.opacity = 0; }
+  }
   ticking = false;
 }
 addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -247,13 +257,15 @@ addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimat
 /* ============ Debu halus ============ */
 (function dust() {
   if (reduce) return;
-  const c = $("#dust"), x = c.getContext("2d"); let w, h; const n = innerWidth < 700 ? 22 : 40;
+  const c = $("#dust"), x = c.getContext("2d"); let w, h; const n = innerWidth < 700 ? 14 : 28;
   const size = () => { w = c.width = innerWidth; h = c.height = innerHeight; }; size(); addEventListener("resize", size);
   const p = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.4 + .3, v: Math.random() * .25 + .08, a: Math.random() * .4 + .15 }));
+  let fr = 0;
   (function loop() {
-    x.clearRect(0, 0, w, h);
-    p.forEach(q => { q.y -= q.v; q.x += Math.sin(q.y / 60) * .15; if (q.y < -4) { q.y = h + 4; q.x = Math.random() * w; } x.fillStyle = `rgba(245,190,205,${q.a})`; x.beginPath(); x.arc(q.x, q.y, q.r, 0, 6.28); x.fill(); });
     requestAnimationFrame(loop);
+    if (++fr & 1) return;   // 30 fps cukup untuk debu halus
+    x.clearRect(0, 0, w, h);
+    p.forEach(q => { q.y -= q.v * 2; q.x += Math.sin(q.y / 60) * .3; if (q.y < -4) { q.y = h + 4; q.x = Math.random() * w; } x.fillStyle = `rgba(245,190,205,${q.a})`; x.beginPath(); x.arc(q.x, q.y, q.r, 0, 6.28); x.fill(); });
   })();
 })();
 
@@ -310,6 +322,7 @@ function petalLoop() {
 function petalStart() { if (!pRun) { pRun = true; requestAnimationFrame(petalLoop); } }
 function petalBurst(x, y, n = 30, hearts = false) {
   petalInit(); if (!pctx) return;
+  if (innerWidth < 700) n = Math.round(n * .6);
   for (let i = 0; i < n; i++) {
     const ang = -Math.PI / 2 + (Math.random() - .5) * 2.6, sp = Math.random() * 9 + 3;
     petals.push(newPetal(x, y, { vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, burst: true, heart: hearts && i % 3 === 0 }));
@@ -318,7 +331,7 @@ function petalBurst(x, y, n = 30, hearts = false) {
 }
 function petalAmbient() {
   petalInit(); if (!pctx) return;
-  const n = innerWidth < 700 ? 12 : 20;
+  const n = innerWidth < 700 ? 8 : 14;
   for (let i = 0; i < n; i++) petals.push(newPetal(Math.random() * pw, -Math.random() * ph));
   petalStart();
 }
@@ -407,10 +420,7 @@ $("#cd").classList.add("rv");
 
 // 5) teks hero bergeser pelan & memudar saat digulir
 const heroIn = $(".hero-in");
-if (!reduce) addEventListener("scroll", () => {
-  const y = scrollY, h = innerHeight;
-  if (y < h) { heroIn.style.transform = `translateY(${y * .25}px)`; heroIn.style.opacity = Math.max(0, 1 - y / (h * .7)); }
-}, { passive: true });
+// (animasi hero kini ditangani onScroll agar hanya satu pembaca scroll)
 
 // 6) ornamen mawar di sudut tiap bagian
 const addCorners = (el, list) => list.forEach(k => { const c = document.createElement("i"); c.className = "corner " + k; c.setAttribute("aria-hidden", "true"); el.append(c); io.observe(c); });
@@ -429,20 +439,6 @@ Object.keys(wow).forEach(id => wio.observe($("#" + id)));
 // 8) setiap bagian larut masuk saat pertama terlihat
 const sio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.remove("pre"); sio.unobserve(e.target); } }), { threshold: .05 });
 $$(".sec").forEach(s => { s.classList.add("pre"); sio.observe(s); });
-
-// 9) ranting terdorong angin saat halaman digulir
-if (!reduce) {
-  const cs = $$(".corner"); let wy = scrollY, wind = 0, tgt = 0, wRun = false;
-  const wLoop = () => {
-    wind += (tgt - wind) * .08; tgt *= .92;
-    cs.forEach(c => c.style.setProperty("--wind", wind.toFixed(2) + "deg"));
-    if (Math.abs(wind) > .02 || Math.abs(tgt) > .02) requestAnimationFrame(wLoop); else wRun = false;
-  };
-  addEventListener("scroll", () => {
-    tgt = Math.max(-8, Math.min(8, tgt + (scrollY - wy) * .12)); wy = scrollY;
-    if (!wRun) { wRun = true; requestAnimationFrame(wLoop); }
-  }, { passive: true });
-}
 
 // 10) navigasi melayang: tandai bagian yang sedang dilihat
 const navLinks = $$("#dock a"), secToNav = new Map();

@@ -460,3 +460,53 @@ body.autoing .dock{backdrop-filter:none}
 @media(hover:none){.grain{display:none}}
 .cover.gone::before{animation-play-state:paused}
 .rv,.w,.ch{will-change:auto}
+
+
+/* === Merpati: terbang melintas & berpasangan === */
+.doves{position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;width:min(100%,var(--col));overflow:hidden;pointer-events:none;z-index:88}
+.dove{position:absolute;left:0;will-change:transform,opacity;animation:doveX var(--dur,13s) linear var(--dl,0s) both}
+.dove.rtl{animation-name:doveXr}
+.dove i{display:block;width:var(--sz,60px);animation:doveBob 2.6s ease-in-out infinite alternate}
+.dove.rtl svg{transform:scaleX(-1)}
+@keyframes doveX{0%{transform:translate3d(-110px,0,0);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate3d(calc(var(--w) + 110px),0,0);opacity:0}}
+@keyframes doveXr{0%{transform:translate3d(calc(var(--w) + 110px),0,0);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate3d(-110px,0,0);opacity:0}}
+@keyframes doveBob{from{transform:translateY(-10px) rotate(-3deg)}to{transform:translateY(12px) rotate(3deg)}}
+.dove svg,.dp svg{display:block;width:100%;height:auto;overflow:visible;fill:#fff7f9;stroke:rgba(232,169,184,.55);stroke-width:.7;stroke-linejoin:round}
+.dove .eye,.dp .eye{fill:#8c1f3a;stroke:none}
+.dove .ft,.dp .ft{fill:none;stroke:rgba(214,120,145,.55);stroke-width:.9;stroke-linecap:round}
+.wf,.wb{transform-box:view-box}
+.wf{transform-origin:52px 49px;transform:rotate(-8deg)}
+.wb{transform-origin:50px 52px}
+.fly .wf{animation:flapU .5s ease-in-out infinite alternate}
+.fly .wb{animation:flapD .5s ease-in-out infinite alternate}
+@keyframes flapU{from{transform:rotate(12deg)}to{transform:rotate(-34deg)}}
+@keyframes flapD{from{transform:rotate(-10deg)}to{transform:rotate(16deg)}}
+.dove-pair{display:flex;align-items:center;justify-content:center;gap:.7rem;margin:1.8rem auto}
+.dp{width:62px;display:block}
+.dp.r svg{transform:scaleX(-1)}
+.dp-h{width:20px;height:20px;fill:var(--gold);stroke:none;animation:dpBeat 2.4s ease-in-out infinite}
+@keyframes dpBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@media(prefers-reduced-motion:reduce){.doves{display:none}.fly .wf,.fly .wb,.dp-h{animation:none}}
+
+/* === Soft & smooth: kembalikan kesan lembut (blur tipis) dengan biaya render rendah === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
+/* blok yang muncul: blur tipis + naik pelan, easing lebih lembut */
+.rv{filter:blur(6px);transform:translateY(38px) scale(.98);transition:opacity 1.9s var(--ease) var(--d,0s),transform 1.9s var(--ease) var(--d,0s),filter 1.6s var(--ease) var(--d,0s)}
+.rv.in{filter:blur(0)}
+.rv[data-fx=left]{transform:translateX(-50px)}
+.rv[data-fx=right]{transform:translateX(50px)}
+.rv[data-fx=zoom]{transform:scale(.82)}
+.rv.in,.rv.in[data-fx]{transform:none}
+.map.rv,.map.rv.in{filter:none;transform:none}
+/* nama besar: transisi yang sama tanpa animasi jarak huruf (sudah 0) */
+.hero .big.rv,#save .big.rv,#final .big.rv{transition:opacity 2.2s var(--ease) var(--d,0s),transform 2.2s var(--ease) var(--d,0s),filter 2s var(--ease) var(--d,0s)}
+/* kata & huruf: blur kecil saja (murah) */
+.quote .w,.intro-names .w,.sign .w,.muted .w,.serif-q .w{filter:blur(3px);transition:opacity 1.3s var(--ease),transform 1.3s var(--ease),filter 1.1s var(--ease)}
+.head .ch{filter:blur(3px);transition:opacity 1.1s var(--ease),transform 1.3s var(--ease),filter 1s var(--ease)}
+.quote.in .w,.intro-names.in .w,.sign.in .w,.muted.in .w,.serif-q.in .w,.head.in .ch{filter:blur(0)}
+/* cahaya lembut di nama mempelai (statis, tidak membebani) */
+.cover .names,.hero .big,#save .big,#final .big{text-shadow:0 0 34px rgba(232,169,184,.35)}
+.hero-in{will-change:transform,opacity}
+/* saat gulir otomatis aktif, tetap tanpa blur supaya mulus */
+body.autoing .rv,body.autoing .w,body.autoing .ch{filter:none}
+@media(prefers-reduced-motion:reduce){.rv,.w,.ch{filter:none!important}}

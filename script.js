@@ -53,6 +53,7 @@ $("#openBtn").addEventListener("click", () => {
     setTimeout(() => f.remove(), 4200);
     setTimeout(() => petalBurst(innerWidth / 2, innerHeight * .55, 90, true), 2200);
     setTimeout(petalAmbient, 2800);
+    setTimeout(() => doveFly(2), 3600);
   }
   setTimeout(() => { $("#cover").classList.add("gone"); document.body.classList.remove("locked"); window.scrollTo(0, 0); }, reduce ? 300 : 2200);
   setTimeout(() => heroRv.forEach(el => el.classList.add("in")), reduce ? 400 : 2300);
@@ -188,12 +189,8 @@ $("#rsvpForm").addEventListener("submit", e => {
   submitData("rsvp", d).catch(() => toast("Gagal mengirim. Coba lagi."));
 });
 
-// Contoh ucapan bawaan. Kosongkan array ini ([]) kalau tidak ingin ditampilkan.
-const defaultWishes = [
-  { name: "Keluarga Besar", text: "Selamat menempuh hidup baru. Semoga sakinah, mawaddah, warahmah." },
-  { name: "Sahabat", text: "Bahagia selalu untuk kalian berdua. Semoga setiap langkah dipenuhi berkah." },
-  { name: "Rekan Kerja", text: "Barakallahu lakuma wa baraka alaikuma wa jama'a bainakuma fii khair." }
-];
+// Tidak ada ucapan bawaan: daftar hanya berisi ucapan asli dari tamu.
+const defaultWishes = [];
 let wishes = [...defaultWishes];
 function renderWishes() { $("#wishList").innerHTML = wishes.map(w => `<article class="wish"><h4>${esc(w.name)}</h4><p>${esc(w.text)}</p></article>`).join(""); }
 renderWishes();
@@ -433,6 +430,7 @@ const wio = new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return; wio.unobserve(e.target);
   if (reduce || document.body.classList.contains("locked")) return;
   const [n, h] = wow[e.target.id]; petalBurst(innerWidth / 2, innerHeight * .92, n, h);
+  const dv = { couple: 2, save: 3, cine: 2, final: 3 }[e.target.id]; if (dv) setTimeout(() => doveFly(dv), 900);
 }), { threshold: .45 });
 Object.keys(wow).forEach(id => wio.observe($("#" + id)));
 
@@ -445,6 +443,36 @@ const navLinks = $$("#dock a"), secToNav = new Map();
 navLinks.forEach(a => a.dataset.t.split(" ").forEach(id => secToNav.set(id, a)));
 const nio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle("on", a === secToNav.get(e.target.id))); }), { rootMargin: "-45% 0px -45% 0px" });
 secToNav.forEach((a, id) => nio.observe($("#" + id)));
+
+/* ============ Merpati terbang & merpati berpasangan ============ */
+function doveSVG(fly) {
+  return `<svg class="${fly ? "fly" : ""}" viewBox="0 0 120 80" aria-hidden="true">
+<g class="wb"><path d="M52 52C46 64 36 72 18 76C27 66 33 58 40 50Z"/></g>
+<path d="M14 53L0 47L5 54L1 61L17 57Z"/>
+<path d="M6 54C18 50 30 52 44 49C58 46 70 41 79 36C80 30 85 27 90 29L99 32L91 35C91 42 84 50 70 56C54 62 30 62 6 54Z"/>
+<circle cx="87" cy="33" r="1.4" class="eye"/>
+<g class="wf"><path d="M52 49C47 31 36 15 12 3C15 19 22 33 31 46C38 53 46 54 52 49Z"/><path class="ft" d="M45 45C39 32 29 19 16 9M37 48C33 38 27 28 21 20"/></g>
+</svg>`;
+}
+const HEART = '<svg class="dp-h" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+$$(".dove-pair").forEach(el => { el.innerHTML = '<span class="dp">' + doveSVG(false) + "</span>" + HEART + '<span class="dp r">' + doveSVG(false) + "</span>"; });
+
+function doveFly(n = 2) {
+  if (reduce) return;
+  const box = $("#doves"); if (!box || document.hidden || document.body.classList.contains("locked")) return;
+  n = Math.min(n, 4 - box.children.length); if (n <= 0) return;
+  const w = box.clientWidth, rtl = Math.random() < .35, base = innerHeight * (.12 + Math.random() * .42);
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement("div"), sz = 46 + Math.random() * 30, far = sz < 58;
+    d.className = "dove" + (rtl ? " rtl" : "");
+    d.style.cssText = `top:${Math.round(base + i * (34 + Math.random() * 30))}px;--w:${w}px;--sz:${Math.round(sz)}px;--dur:${(far ? 15 : 11.5) + Math.random() * 3}s;--dl:${(i * .7 + Math.random() * .4).toFixed(2)}s;opacity:${far ? .8 : 1}`;
+    d.innerHTML = "<i>" + doveSVG(true) + "</i>";
+    d.addEventListener("animationend", e => { if (e.target === d) d.remove(); });
+    box.appendChild(d);
+  }
+}
+// sesekali satu merpati lewat saat tamu masih membaca
+setInterval(() => { if ($("#cover").classList.contains("gone")) doveFly(1); }, 26000);
 
 observe(); onScroll();
 
